@@ -26,25 +26,31 @@ public class FieldController : ControllerBase
         if (user != null && _userService.UserHasAccess(user, "admin"))
         {
             var collection = _mongoDB.GetCollection<BsonDocument>(request.CollectionName);
-        UpdateDefinition<BsonDocument> update;
-        if (request.FieldType == "Number")
-        {
-            update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create(123));
-        }
-        else if (request.FieldType == "Date") {
-            update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create(DateTime.Now)); }
-        else
-        {
+            UpdateDefinition<BsonDocument> update;
+            if (request.FieldType == "Number")
+            {
+                update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create(123.0));
+            }
+            else if (request.FieldType == "Date")
+            {
+                update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create(DateTime.Now));
+            }
+            else if (request.FieldType == "Boolean")
+            {
+                update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create(true));
+            }
+            else
+            {
 
-            update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create("new field"));
-        }
-        var result = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.NewFieldName, false), update);
+                update = Builders<BsonDocument>.Update.Set(request.NewFieldName, BsonValue.Create("new field"));
+            }
+            var result = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.NewFieldName, false), update);
 
-        return Ok(new
-        {
-            success = true,
-            modifiedCount = result.ModifiedCount
-        });
+            return Ok(new
+            {
+                success = true,
+                modifiedCount = result.ModifiedCount
+            });
         }
         else
         {
@@ -61,11 +67,11 @@ public class FieldController : ControllerBase
         {
             var collection = _mongoDB.GetCollection<BsonDocument>(request.CollectionName);
 
-        // Видаляємо поле з усіх документів
-        var update = Builders<BsonDocument>.Update.Unset(request.FieldName);
-        var result = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.FieldName), update);
+            // Видаляємо поле з усіх документів
+            var update = Builders<BsonDocument>.Update.Unset(request.FieldName);
+            var result = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.FieldName), update);
 
-        return Ok(new { success = true, modifiedCount = result.ModifiedCount });
+            return Ok(new { success = true, modifiedCount = result.ModifiedCount });
         }
         else
         {
@@ -77,19 +83,19 @@ public class FieldController : ControllerBase
     [HttpPost("rename-field")]
     public async Task<IActionResult> RenameField([FromBody] RenameFieldRequest request)
     {
-            var user = this.HttpContext.Request.Cookies["Username"];
-            if (user != null && _userService.UserHasAccess(user, "admin"))
-            {
-                var collection = _mongoDB.GetCollection<BsonDocument>(request.CollectionName);
+        var user = this.HttpContext.Request.Cookies["Username"];
+        if (user != null && _userService.UserHasAccess(user, "admin"))
+        {
+            var collection = _mongoDB.GetCollection<BsonDocument>(request.CollectionName);
 
-        // Для перейменування поля потрібно спочатку додати нове поле з тією ж самою інформацією, а потім видалити старе поле
-        var updateAdd = Builders<BsonDocument>.Update.Set(request.NewFieldName, $"${request.OldFieldName}");
-        var resultAdd = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.OldFieldName), updateAdd);
+            // Для перейменування поля потрібно спочатку додати нове поле з тією ж самою інформацією, а потім видалити старе поле
+            var updateAdd = Builders<BsonDocument>.Update.Set(request.NewFieldName, $"${request.OldFieldName}");
+            var resultAdd = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.OldFieldName), updateAdd);
 
-        var updateRemove = Builders<BsonDocument>.Update.Unset(request.OldFieldName);
-        var resultRemove = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.OldFieldName), updateRemove);
+            var updateRemove = Builders<BsonDocument>.Update.Unset(request.OldFieldName);
+            var resultRemove = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.OldFieldName), updateRemove);
 
-        return Ok(new { success = true, modifiedCount = resultAdd.ModifiedCount });
+            return Ok(new { success = true, modifiedCount = resultAdd.ModifiedCount });
         }
         else
         {

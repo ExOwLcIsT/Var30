@@ -1,0 +1,32 @@
+﻿@page
+@model Var30.Pages.SkiEquipmentModel
+@{
+    ViewData["Title"] = "Ski Equipment Orders";
+}
+
+<h2>Ski Equipment Orders</h2>
+
+@if (Model.EquipmentOrders.Count == 0)
+{
+    <p>No equipment orders found for the last week.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Equipment Type</th>
+                <th>Orders in Last Week</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.EquipmentOrders)
+            {
+                <tr>
+                    <td>@item.Type</td>
+                    <td>@item.OrderCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

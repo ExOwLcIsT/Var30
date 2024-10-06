@@ -1,0 +1,59 @@
+﻿@page
+@model Var30.Pages.RentalSumModel
+@{
+    ViewData["Title"] = "Rental Sums by Month and Quarter";
+}
+
+<h2>Rental Sums by Month</h2>
+
+@if (Model.MonthlyRentalSums.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Total Rental Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var stat in Model.MonthlyRentalSums)
+            {
+                <tr>
+                    <td>@stat.Period</td>
+                    <td>@stat.TotalAmount.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No rental data available for the selected period.</p>
+}
+
+<h2>Rental Sums by Quarter</h2>
+
+@if (Model.QuarterlyRentalSums.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Quarter</th>
+                <th>Total Rental Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var stat in Model.QuarterlyRentalSums)
+            {
+                <tr>
+                    <td>@stat.Period</td>
+                    <td>@stat.TotalAmount.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No rental data available for the selected period.</p>
+}

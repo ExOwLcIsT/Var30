@@ -21,10 +21,12 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         var collections = await _mongoDB.ListCollectionNamesAsync();
+        var collectionsList = await collections.ToListAsync();
+        collectionsList.Remove("Keys");
         CollectionData = new CollectionViewModel
         {
             Login = (HttpContext.Request.Cookies["Username"] == null ? "" : HttpContext.Request.Cookies["Username"]),
-            Collections = await collections.ToListAsync(),
+            Collections = collectionsList,
             SelectedCollection = "",
             Documents = new List<Dictionary<string, object>>(),
             Headers = new List<string>()
@@ -37,6 +39,7 @@ public class IndexModel : PageModel
         {
             var collections = await _mongoDB.ListCollectionNamesAsync();
             CollectionData.Collections = await collections.ToListAsync();
+            CollectionData.Collections.Remove("Keys");
             CollectionData.Documents = new List<Dictionary<string, object>>();
             var collection = _mongoDB.GetCollection<BsonDocument>(CollectionData.SelectedCollection);
             var documents = await collection.Find(new BsonDocument()).ToListAsync();

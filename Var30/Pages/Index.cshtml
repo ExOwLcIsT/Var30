@@ -39,7 +39,7 @@
                 </div>
             </form>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8 w-100">
             <h4>Документи в @Model.CollectionData.SelectedCollection</h4>
             <div class="mb-3">
                 <form id="addFieldForm" onsubmit="event.preventDefault(); addField();">
@@ -51,6 +51,7 @@
                             <option value="String">String</option>
                             <option value="Number">Number</option>
                             <option value="Date">Date</option>
+                            <option value="Boolean">Boolean</option>
                         </select>
 
                         <button type="submit" class="btn btn-success">Додати поле</button>
@@ -58,7 +59,7 @@
                 </form>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-bordered ">
                     <thead>
                         <tr>
                             <th>Дія</th>
@@ -108,9 +109,44 @@
         </div>
     </div>
 </div>
+
+
 @section Scripts {
     <script>
-       
+       function executeQuery() {
+            const query = document.getElementById("queries").value;
+            const resultBody = document.getElementById("resultBody");
+            resultBody.innerHTML = ''; 
+
+            if (!query) return; 
+
+            const url = `api/SkiResort/${query}`;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.length === 0) {
+                        resultBody.innerHTML = '<tr><td>Немає даних</td></tr>';
+                        return;
+                    }
+
+                    data.forEach(item => {
+                        let row = '<tr>';
+                        for (const property in item) {
+                            row += `<td>${item[property]}</td>`;
+                        }
+                        row += '</tr>';
+                        resultBody.innerHTML += row;
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    resultBody.innerHTML = '<tr><td>Сталася помилка при виконанні запиту</td></tr>';
+                }
+            });
+        }
 
 
         function addCollection() {
@@ -328,65 +364,95 @@
         }
 
         // Функція, яка перетворює комірку на інпут відповідного типу
-        function makeEditable(td, dataType) {
-            // Отримуємо поточне значення комірки
-            let currentValue = td.innerText;
+       function makeEditable(td, dataType) {
+    // Отримуємо поточне значення комірки
+    let currentValue = td.innerText;
 
-            // Визначаємо тип інпуту на основі типу даних
-            let inputType = "text"; // За замовчуванням текстовий інпут
-            if (dataType === "Int32" || dataType === "Double" || dataType === "Float" || dataType === "Decimal") {
-                inputType = "number"; // Для числових значень
-            } else if (dataType === "BsonDateTime") {
-                inputType = "date"; // Для дат
-                let date = new Date(currentValue);
-                console.log(date)
-                currentValue = date.toISOString().split('T')[0];
+    // Визначаємо тип інпуту на основі типу даних
+    let inputType = "text"; // За замовчуванням текстовий інпут
+    if (dataType === "Int32" || dataType === "Double" || dataType === "Float" || dataType === "Decimal") {
+        inputType = "number"; // Для числових значень
+    } else if (dataType === "BsonDateTime") {
+        inputType = "date"; // Для дат
+        let date = new Date(currentValue);
+        console.log(date);
+        currentValue = date.toISOString().split('T')[0];
+    } else if (dataType === "BsonBoolean") {
+        inputType = "checkbox"; // Для булевих значень
+    }
+
+    // Створюємо інпут з відповідним типом
+    let input = document.createElement("input");
+    input.type = inputType;
+
+    // Якщо це чекбокс, встановлюємо checked на основі поточного значення
+    if (dataType === "BsonBoolean") {
+        input.checked = currentValue === "true"; // Перевіряємо, чи значення true або false
+    } else {
+        input.value = currentValue;
+    }
+
+    input.onblur = function () {
+        if (this.type !== "checkbox") {
+            if (this.value !== currentValue) {
+                let newValue = this.value;
+                let documentId = td.closest('tr').getAttribute('data-document-id'); // Отримаємо id документа
+                let fieldName = td.getAttribute('data-field-name'); // Отримаємо ім'я поля
+
+                // Викликаємо функцію для відправки даних
+                updateDocumentInDb(documentId, fieldName, newValue,dataType, function (success) {
+                    if (success) {
+                        // Якщо запит успішний, змінюємо значення комірки
+                        td.innerText = newValue;
+                    } else {
+                        td.innerText = currentValue;
+                        alert('Не вдалося оновити документ');
+                    }
+                });
+            } else {
+                td.innerText = currentValue;
             }
-            // Створюємо інпут з відповідним типом
-            let input = document.createElement("input");
-            input.type = inputType;
-            input.value = currentValue;
-            input.classList.add("form-control");
-            input.onblur = function () {
-                if (this.value !== currentValue) {
-                    // Відправляємо AJAX-запит на сервер
-                    let newValue = this.value;
-                    let documentId = td.closest('tr').getAttribute('data-document-id'); // Отримаємо id документа
-                    let fieldName = td.getAttribute('data-field-name'); // Отримаємо ім'я поля
-
-                    // Викликаємо функцію для відправки даних
-                    updateDocumentInDb(documentId, fieldName, newValue, function (success) {
-                        if (success) {
-                            // Якщо запит успішний, змінюємо значення комірки
-                            td.innerText = newValue;
-                        } else {
-                            // Якщо запит невдалий, повертаємо попереднє значення
-                            td.innerText = currentValue;
-                            alert('Не вдалося оновити документ');
-                        }
-                    });
-                }
-                else {
+        } else {
+            let newValue = this.checked == null ? false : this.checked;
+            let documentId = td.closest('tr').getAttribute('data-document-id');
+            let fieldName = td.getAttribute('data-field-name');
+            console.log(newValue)
+            console.log(documentId)
+            console.log(fieldName)
+            updateDocumentInDb(documentId, fieldName, `${newValue}`, dataType, function (success) {
+                if (success) {
+                    td.innerText = newValue ? "true" : "false";
+                } else {
                     td.innerText = currentValue;
-                }
-            };
-            input.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
-                    input.blur(); // Втратити фокус при натисканні Enter
+                    alert('Не вдалося оновити документ');
                 }
             });
-            td.innerHTML = "";
-            td.appendChild(input);
-            input.focus();
         }
+    };
+
+    input.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            input.blur(); // Втратити фокус при натисканні Enter
+        }
+    });
+
+    td.innerHTML = "";
+    td.appendChild(input);
+    
+    // Якщо це не чекбокс, фокусуємо інпут після вставки
+    if (inputType !== "checkbox") {
+        input.focus();
+    }
+}
 
         // Функція для відправки запиту на бекенд
-        function updateDocumentInDb(documentId, fieldName, newValue, callback) {
+        function updateDocumentInDb(documentId, fieldName, newValue,dataType, callback) {
             // Створюємо дані для відправки
             let data = {
                 id: documentId,
                 field: fieldName,
                 value: newValue,
+                dataType: dataType,
                 collectionName: "@Model.CollectionData.SelectedCollection"
             };
             // Відправляємо запит на сервер

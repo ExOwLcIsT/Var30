@@ -1,0 +1,85 @@
+﻿@page
+@model LiftUsageModel
+@{
+    ViewData["Title"] = "Lift Usage Statistics";
+}
+
+<h2>Lift Usage Statistics</h2>
+
+<h3>Lift Usage by Day</h3>
+@if (Model.LiftUsageByDay.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Lift Name</th>
+                <th>Clients Per Day</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usage in Model.LiftUsageByDay)
+            {
+                <tr>
+                    <td>@usage.LiftName</td>
+                    <td>@usage.ClientsPerDay</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No lift usage data available for daily statistics.</p>
+}
+
+<h3>Lift Usage by Week</h3>
+@if (Model.LiftUsageByWeek.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Lift Name</th>
+                <th>Clients Per Week</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usage in Model.LiftUsageByWeek)
+            {
+                <tr>
+                    <td>@usage.LiftName</td>
+                    <td>@usage.ClientsPerWeek</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No lift usage data available for weekly statistics.</p>
+}
+
+<h3>Lift Usage by Month</h3>
+@if (Model.LiftUsageByMonth.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Lift Name</th>
+                <th>Clients Per Month</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usage in Model.LiftUsageByMonth)
+            {
+                <tr>
+                    <td>@usage.LiftName</td>
+                    <td>@usage.ClientsPerMonth</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No lift usage data available for monthly statistics.</p>
+}

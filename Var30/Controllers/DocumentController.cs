@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Text.Json;
@@ -27,8 +28,17 @@ public class DocumentController : ControllerBase
 
             var filter = Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(request.Id));
 
-            var update = Builders<BsonDocument>.Update.Set(request.Field, BsonValue.Create(request.Value));
+            UpdateDefinition<BsonDocument> update = Builders<BsonDocument>.Update.Set(request.Field, BsonValue.Create(request.Value));
 
+            if (request.DataType == "Int32" || request.DataType == "Double" || request.DataType == "Float" || request.DataType == "Decimal")
+            {
+                Builders<BsonDocument>.Update.Set(request.Field, BsonValue.Create(decimal.Parse(request.Value)));
+            }
+
+            else if (request.DataType == "BsonBoolean")
+            {
+                Builders<BsonDocument>.Update.Set(request.Field, BsonValue.Create(bool.Parse(request.Value)));
+            }
             var result = await collection.UpdateOneAsync(filter, update);
 
             if (result.ModifiedCount > 0)
@@ -60,7 +70,7 @@ public class DocumentController : ControllerBase
             }
             await collection.InsertOneAsync(bsonDocument);
 
-                return Ok(new { success = true, status = 201, documentId = bsonDocument["_id"].ToString() });
+            return Ok(new { success = true, status = 201, documentId = bsonDocument["_id"].ToString() });
         }
         else
         {

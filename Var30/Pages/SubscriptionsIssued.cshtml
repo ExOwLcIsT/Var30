@@ -1,0 +1,71 @@
+﻿@page
+@model SubscriptionsIssuedModel
+@{
+    ViewData["Title"] = "Subscriptions Issued";
+}
+
+<h2>Subscriptions Issued</h2>
+
+<form method="get">
+    <div class="form-group">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+@if (Model.DailySubscriptions != null && Model.DailySubscriptions.Count > 0)
+{
+    <h3>Daily Subscription Count</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var subscription in Model.DailySubscriptions)
+            {
+                <tr>
+                    <td>@subscription.Date.ToShortDateString()</td>
+                    <td>@subscription.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No subscriptions found for the selected period.</p>
+}
+
+@if (Model.TypeSubscriptions != null && Model.TypeSubscriptions.Count > 0)
+{
+    <h3>Subscription Type Count</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var type in Model.TypeSubscriptions)
+            {
+                <tr>
+                    <td>@type.Type</td>
+                    <td>@type.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No subscription types found for the selected period.</p>
+}
