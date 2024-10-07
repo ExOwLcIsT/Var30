@@ -1,0 +1,42 @@
+﻿@page
+@model Var30.Pages.ClientLiftUsageModel
+
+<h2>Client Lift Usage</h2>
+
+<form method="post">
+    <div>
+        <label for="SelectedDate">Select Date:</label>
+        <input type="date" asp-for="SelectedDate" required />
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<h3>Clients Exceeded Allowed Rides</h3>
+@if (Model.ClientsExceededLiftCount.Any())
+{
+    <ul>
+        @foreach (var client in Model.ClientsExceededLiftCount)
+        {
+            <li>@client.ClientName - Total Rides: @client.TotalRides, Allowed Rides: @client.AllowedRides</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No clients exceeded their allowed rides.</p>
+}
+
+<h3>Clients with More than 15 Rides</h3>
+@if (Model.ClientsExceeding15Rides.Any())
+{
+    <ul>
+        @foreach (var client in Model.ClientsExceeding15Rides)
+        {
+            <li>@client.ClientName - Total Rides: @client.TotalRides, Allowed Rides: @client.AllowedRides</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No clients exceeded 15 rides on the selected date.</p>
+}

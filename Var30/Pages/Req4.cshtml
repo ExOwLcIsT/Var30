@@ -1,0 +1,49 @@
+﻿@page
+@model Var30.Pages.LiftUsageStatsModel
+
+<h2>Lift Usage Statistics</h2>
+
+<form method="post">
+    <div>
+        <label>Start Date:</label>
+        <input type="datetime-local" asp-for="StartDate" />
+    </div>
+    <div>
+        <label>End Date:</label>
+        <input type="datetime-local" asp-for="EndDate" />
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+@if (Model.DailyUsage != null)
+{
+    <h3>Daily Usage</h3>
+    <ul>
+        @foreach (var item in Model.DailyUsage)
+        {
+            <li>Lift: @item.Key - Usage: @item.Value</li>
+        }
+    </ul>
+}
+
+@if (Model.WeeklyUsage != null)
+{
+    <h3>Weekly Usage</h3>
+    <ul>
+        @foreach (var item in Model.WeeklyUsage)
+        {
+            <li>Lift: @item.Key - Usage: @item.Value</li>
+        }
+    </ul>
+}
+
+@if (Model.MonthlyUsage != null)
+{
+    <h3>Monthly Usage</h3>
+    <ul>
+        @foreach (var item in Model.MonthlyUsage)
+        {
+            <li>Lift: @item.Key - Usage: @item.Value</li>
+        }
+    </ul>
+}

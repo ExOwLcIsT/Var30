@@ -30,7 +30,7 @@ public class DocumentController : ControllerBase
 
             UpdateDefinition<BsonDocument> update = Builders<BsonDocument>.Update.Set(request.Field, BsonValue.Create(request.Value));
 
-            if (request.DataType == "Int32" || request.DataType == "Double" || request.DataType == "Float" || request.DataType == "Decimal")
+            if (request.DataType == "BsonInt32" || request.DataType == "BsonDouble" || request.DataType == "BsonFloat" || request.DataType == "BsonDecimal")
             {
                 Builders<BsonDocument>.Update.Set(request.Field, BsonValue.Create(decimal.Parse(request.Value)));
             }

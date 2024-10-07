@@ -1,0 +1,31 @@
+﻿@page
+@model SkiEquipmentOrdersModel
+
+<h2>Замовлене гірськолижне обладнання за тиждень</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Обладнання</th>
+            <th>Загальна кількість замовлень</th>
+            <th>Кількість за днями</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var equipmentOrder in Model.SkiEquipmentOrders)
+        {
+            <tr>
+                <td>@equipmentOrder.EquipmentName</td>
+                <td>@equipmentOrder.TotalOrders</td>
+                <td>
+                    <ul>
+                        @foreach (var dailyCount in equipmentOrder.DailyCounts)
+                        {
+                            <li>@dailyCount.Date.ToString("yyyy-MM-dd"): @dailyCount.Count</li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

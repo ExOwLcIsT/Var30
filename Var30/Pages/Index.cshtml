@@ -370,7 +370,7 @@
 
     // Визначаємо тип інпуту на основі типу даних
     let inputType = "text"; // За замовчуванням текстовий інпут
-    if (dataType === "Int32" || dataType === "Double" || dataType === "Float" || dataType === "Decimal") {
+            if (dataType === "BsonInt32" || dataType === "BsonDouble" || dataType === "BsonFloat" || dataType === "BsonDecimal") {
         inputType = "number"; // Для числових значень
     } else if (dataType === "BsonDateTime") {
         inputType = "date"; // Для дат

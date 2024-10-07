@@ -1,0 +1,42 @@
+﻿@page
+@model Var30.Pages.EquipmentRentalStatsModel
+
+<h2>Equipment Rental Statistics</h2>
+
+<h3>Monthly Totals</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Total Rental Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.MonthlyTotals)
+        {
+            <tr>
+                <td>@entry.Key</td>
+                <td>@entry.Value</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Quarterly Totals</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Quarter</th>
+            <th>Total Rental Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.QuarterlyTotals)
+        {
+            <tr>
+                <td>@entry.Key</td>
+                <td>@entry.Value</td>
+            </tr>
+        }
+    </tbody>
+</table>

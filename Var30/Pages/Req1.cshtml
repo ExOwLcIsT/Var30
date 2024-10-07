@@ -1,0 +1,29 @@
+﻿@page
+@model ClientsSubscriptionsModel
+
+<h2>Клієнти та їх абонементи</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Клієнт</th>
+            <th>Тип абонемента</th>
+            <th>Початкова дата</th>
+            <th>Кінцева дата</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var clientSubscription in Model.ClientSubscriptions)
+        {
+            foreach (var subscription in clientSubscription.Subscriptions)
+            {
+                <tr>
+                    <td>@clientSubscription.ClientName</td>
+                    <td>@subscription.SubscriptionType</td>
+                    <td>@subscription.StartDate.ToString("yyyy-MM-dd")</td>
+                    <td>@subscription.EndDate.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

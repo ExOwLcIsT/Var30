@@ -1,0 +1,63 @@
+﻿@page
+@model SubscriptionStatsModel
+@{
+    ViewData["Title"] = "Subscription Statistics";
+}
+
+<h2>Subscription Statistics</h2>
+
+<form method="post">
+    <div>
+        <label for="StartDate">Start Date:</label>
+        <input type="date" asp-for="StartDate" required />
+    </div>
+    <div>
+        <label for="EndDate">End Date:</label>
+        <input type="date" asp-for="EndDate" required />
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+@if (Model.DailySubscriptions != null && Model.DailySubscriptions.Count > 0)
+{
+    <h3>Daily Subscriptions</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var subscription in Model.DailySubscriptions)
+            {
+                <tr>
+                    <td>@subscription.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@subscription.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (Model.SubscriptionTypeCounts != null && Model.SubscriptionTypeCounts.Count > 0)
+{
+    <h3>Subscription Counts by Type</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Subscription Type</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var subscription in Model.SubscriptionTypeCounts)
+            {
+                <tr>
+                    <td>@subscription.Key</td>
+                    <td>@subscription.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
