@@ -1,0 +1,32 @@
+﻿@page
+@model RatesModel
+
+<h2>Equipment Rates</h2>
+
+<form method="post">
+    <button type="submit" class="btn btn-primary">Get Rates</button>
+</form>
+
+@if (Model.EquipmentRates != null && Model.EquipmentRates.Count > 0)
+{
+    <h3>Rates for Equipment</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Equipment Name</th>
+                <th>Weekday Rate</th>
+                <th>Weekend Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var equipment in Model.EquipmentRates)
+            {
+                <tr>
+                    <td>@equipment.Name</td>
+                    <td>@equipment.WeekdayRate</td>
+                    <td>@equipment.WeekendRate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

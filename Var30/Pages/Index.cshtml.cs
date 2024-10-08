@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Var30.Models;
 using System.Reflection.PortableExecutable;
+using System;
 
 public class IndexModel : PageModel
 {
@@ -18,6 +19,7 @@ public class IndexModel : PageModel
     [BindProperty]
     public CollectionViewModel CollectionData { get; set; }
 
+    static Random random = new Random();
     public async Task OnGetAsync()
     {
         var collections = await _mongoDB.ListCollectionNamesAsync();

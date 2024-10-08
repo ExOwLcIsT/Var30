@@ -1,0 +1,32 @@
+﻿@page
+@model Var30.Pages.UnlimitedSubscriptionDiscountModel
+@{
+    ViewData["Title"] = "Clients Eligible for Discount";
+}
+
+<h2>Clients Eligible for 10% Discount on Unlimited Subscription</h2>
+
+@if (Model.ClientsWithDiscount != null && Model.ClientsWithDiscount.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Client ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in Model.ClientsWithDiscount)
+            {
+                <tr>
+                    <td>@client.ClientName</td>
+                    <td>@client.ClientId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No clients found with unlimited subscriptions in February.</p>
+}

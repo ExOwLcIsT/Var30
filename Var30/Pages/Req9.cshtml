@@ -1,0 +1,63 @@
+﻿@page
+@model Var30.Pages.ClientsVisitsModel
+@{
+    ViewData["Title"] = "Clients Visits";
+}
+
+<h2>Clients who visited from January 2 to January 12</h2>
+
+@if (Model.ClientsVisitedInRange.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Visit Count</th>
+                <th>First Visit Date</th>
+                <th>Last Visit Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in Model.ClientsVisitedInRange)
+            {
+                <tr>
+                    <td>@client.Name</td>
+                    <td>@client.VisitCount</td>
+                    <td>@client.FirstVisitDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@client.LastVisitDate?.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No clients found who visited between January 2 and January 12.</p>
+}
+
+<h2>Clients who visited more than three times</h2>
+
+@if (Model.FrequentVisitors.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Visit Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in Model.FrequentVisitors)
+            {
+                <tr>
+                    <td>@client.Name</td>
+                    <td>@client.VisitCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No clients found who visited more than three times.</p>
+}

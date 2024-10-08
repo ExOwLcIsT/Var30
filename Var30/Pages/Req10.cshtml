@@ -1,0 +1,65 @@
+﻿@page
+@model WorkersAndEquipmentModel
+@{
+    ViewData["Title"] = "Робітники і спорядження";
+}
+
+<h1>Робітники і видане спорядження</h1>
+
+<!-- Input для вибору дати -->
+<form method="get">
+    <label for="selectedDate">Виберіть дату:</label>
+    <input type="date" id="selectedDate" name="SelectedDate" value="@Model.SelectedDate?.ToString("yyyy-MM-dd")" />
+    <button type="submit">Показати результати</button>
+</form>
+
+<hr />
+
+<h2>Робітники та видане спорядження</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Ім'я робітника</th>
+            <th>Посада</th>
+            <th>Ідентифікатор спорядження</th>
+            <th>Дата видачі</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var worker in Model.WorkerEquipmentList)
+        {
+            <tr>
+                <td>@worker.WorkerName</td>
+                <td>@worker.Position</td>
+                <td>@worker.EquipmentId</td>
+                <td>@worker.Date.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Робітники, які працювали у зазначений день</h2>
+@if (Model.WorkersByDay.Any())
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Ім'я робітника</th>
+                <th>Посада</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var worker in Model.WorkersByDay)
+            {
+                <tr>
+                    <td>@worker.WorkerName</td>
+                    <td>@worker.Position</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Робітники на вибрану дату не знайдені.</p>
+}
