@@ -82,7 +82,57 @@
                             @foreach (var key in Model.CollectionData.Headers)
                             {
                                 <td>
-                                    <input type="text" id="new-@key" class="form-control" placeholder="Введіть @key" />
+                                    @if (Model.CollectionData.Documents.FirstOrDefault() != null)
+                                    {
+                                        // Отримуємо тип поля
+                                        var bsonValue = Model.CollectionData.Documents.FirstOrDefault()[key];
+                                        var dataType = bsonValue.GetType().Name;
+
+                                        // Визначаємо тип інпута на основі типу даних
+                                        string inputType = "text"; // За замовчуванням
+                                        string currentValue = bsonValue?.ToString(); // Поточне значення поля
+
+                                        if (dataType == "BsonInt32" || dataType == "BsonDouble" || dataType == "BsonFloat" || dataType == "BsonDecimal")
+                                        {
+                                            inputType = "number"; // Для числових значень
+                                        }
+                                        else if (dataType == "BsonDateTime")
+                                        {
+                                            inputType = "date"; // Для дат
+
+                                            // Перевіряємо, чи можна кастити в BsonDateTime
+                                            if (bsonValue is MongoDB.Bson.BsonDateTime bsonDateTime)
+                                            {
+                                                DateTime date = bsonDateTime.ToUniversalTime();
+                                                currentValue = date.ToString("yyyy-MM-dd"); // ISO формат для інпуту з типом "date"
+                                            }
+                                        }
+                                        else if (dataType == "BsonBoolean")
+                                        {
+                                            inputType = "checkbox"; // Для булевих значень
+
+                                            // Перевіряємо, чи можна кастити в BsonBoolean
+                                            if (bsonValue is MongoDB.Bson.BsonBoolean bsonBoolean)
+                                            {
+                                                currentValue = bsonBoolean.Value ? "checked" : ""; // Отримуємо значення bool через властивість Value
+                                            }
+                                        }
+
+                                        // Виводимо інпут на основі типу
+                                        if (inputType == "checkbox")
+                                        {
+                                            <input type="checkbox" id="new-@key"  @currentValue />
+                                        }
+                                        else
+                                        {
+                                            <input type="@inputType" id="new-@key" class="form-control" value="@currentValue" placeholder="Введіть @key" />
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <input type="text" id="new-@key" class="form-control" placeholder="Введіть @key" />
+                                    }
+
                                 </td>
                             }
                         </tr>
@@ -113,12 +163,12 @@
 
 @section Scripts {
     <script>
-       function executeQuery() {
+        function executeQuery() {
             const query = document.getElementById("queries").value;
             const resultBody = document.getElementById("resultBody");
-            resultBody.innerHTML = ''; 
+            resultBody.innerHTML = '';
 
-            if (!query) return; 
+            if (!query) return;
 
             const url = `api/SkiResort/${query}`;
 
@@ -338,7 +388,15 @@
             const headers = @Html.Raw(Json.Serialize(Model.CollectionData.Headers));
 
             headers.forEach(function (key) {
-                newDocument[key] = document.getElementById(`new-${key}`).value;
+                var inputElement = document.getElementById(`new-${key}`);
+
+    if (inputElement.type === "checkbox") {
+        // Якщо інпут є чекбоксом, перевіряємо, чи він позначений
+        newDocument[key] = inputElement.checked ? true : false;
+    } else {
+        // Для всіх інших типів інпутів
+        newDocument[key] = inputElement.value;
+    }
             });
             console.log(newDocument);
             fetch(`/api/document/add-document`, {
@@ -364,89 +422,90 @@
         }
 
         // Функція, яка перетворює комірку на інпут відповідного типу
-       function makeEditable(td, dataType) {
-    // Отримуємо поточне значення комірки
-    let currentValue = td.innerText;
+        function makeEditable(td, dataType) {
+            // Отримуємо поточне значення комірки
+            let currentValue = td.innerText;
 
-    // Визначаємо тип інпуту на основі типу даних
-    let inputType = "text"; // За замовчуванням текстовий інпут
+            // Визначаємо тип інпуту на основі типу даних
+            let inputType = "text"; // За замовчуванням текстовий інпут
+            console.log(dataType);
             if (dataType === "BsonInt32" || dataType === "BsonDouble" || dataType === "BsonFloat" || dataType === "BsonDecimal") {
-        inputType = "number"; // Для числових значень
-    } else if (dataType === "BsonDateTime") {
-        inputType = "date"; // Для дат
-        let date = new Date(currentValue);
-        console.log(date);
-        currentValue = date.toISOString().split('T')[0];
-    } else if (dataType === "BsonBoolean") {
-        inputType = "checkbox"; // Для булевих значень
-    }
+                inputType = "number"; // Для числових значень
+            } else if (dataType === "BsonDateTime") {
+                inputType = "date"; // Для дат
+                let date = new Date(currentValue);
+                console.log(date);
+                currentValue = date.toISOString().split('T')[0];
+            } else if (dataType === "BsonBoolean") {
+                inputType = "checkbox"; // Для булевих значень
+            }
 
-    // Створюємо інпут з відповідним типом
-    let input = document.createElement("input");
-    input.type = inputType;
+            // Створюємо інпут з відповідним типом
+            let input = document.createElement("input");
+            input.type = inputType;
 
-    // Якщо це чекбокс, встановлюємо checked на основі поточного значення
-    if (dataType === "BsonBoolean") {
-        input.checked = currentValue === "true"; // Перевіряємо, чи значення true або false
-    } else {
-        input.value = currentValue;
-    }
+            // Якщо це чекбокс, встановлюємо checked на основі поточного значення
+            if (dataType === "BsonBoolean") {
+                input.checked = currentValue === "true"; // Перевіряємо, чи значення true або false
+            } else {
+                input.value = currentValue;
+            }
 
-    input.onblur = function () {
-        if (this.type !== "checkbox") {
-            if (this.value !== currentValue) {
-                let newValue = this.value;
-                let documentId = td.closest('tr').getAttribute('data-document-id'); // Отримаємо id документа
-                let fieldName = td.getAttribute('data-field-name'); // Отримаємо ім'я поля
+            input.onblur = function () {
+                if (this.type !== "checkbox") {
+                    if (this.value !== currentValue) {
+                        let newValue = this.value;
+                        let documentId = td.closest('tr').getAttribute('data-document-id'); // Отримаємо id документа
+                        let fieldName = td.getAttribute('data-field-name'); // Отримаємо ім'я поля
 
-                // Викликаємо функцію для відправки даних
-                updateDocumentInDb(documentId, fieldName, newValue,dataType, function (success) {
-                    if (success) {
-                        // Якщо запит успішний, змінюємо значення комірки
-                        td.innerText = newValue;
+                        // Викликаємо функцію для відправки даних
+                        updateDocumentInDb(documentId, fieldName, newValue, dataType, function (success) {
+                            if (success) {
+                                // Якщо запит успішний, змінюємо значення комірки
+                                td.innerText = newValue;
+                            } else {
+                                td.innerText = currentValue;
+                                alert('Не вдалося оновити документ');
+                            }
+                        });
                     } else {
                         td.innerText = currentValue;
-                        alert('Не вдалося оновити документ');
                     }
-                });
-            } else {
-                td.innerText = currentValue;
-            }
-        } else {
-            let newValue = this.checked == null ? false : this.checked;
-            let documentId = td.closest('tr').getAttribute('data-document-id');
-            let fieldName = td.getAttribute('data-field-name');
-            console.log(newValue)
-            console.log(documentId)
-            console.log(fieldName)
-            updateDocumentInDb(documentId, fieldName, `${newValue}`, dataType, function (success) {
-                if (success) {
-                    td.innerText = newValue ? "true" : "false";
                 } else {
-                    td.innerText = currentValue;
-                    alert('Не вдалося оновити документ');
+                    let newValue = this.checked == null ? false : this.checked;
+                    let documentId = td.closest('tr').getAttribute('data-document-id');
+                    let fieldName = td.getAttribute('data-field-name');
+                    console.log(newValue)
+                    console.log(documentId)
+                    console.log(fieldName)
+                    updateDocumentInDb(documentId, fieldName, `${newValue}`, dataType, function (success) {
+                        if (success) {
+                            td.innerText = newValue ? "true" : "false";
+                        } else {
+                            td.innerText = currentValue;
+                            alert('Не вдалося оновити документ');
+                        }
+                    });
+                }
+            };
+
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    input.blur(); // Втратити фокус при натисканні Enter
                 }
             });
-        }
-    };
 
-    input.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            input.blur(); // Втратити фокус при натисканні Enter
-        }
-    });
+            td.innerHTML = "";
+            td.appendChild(input);
 
-    td.innerHTML = "";
-    td.appendChild(input);
-    
-    // Якщо це не чекбокс, фокусуємо інпут після вставки
-    if (inputType !== "checkbox") {
-        input.focus();
-    }
-}
+            // Якщо це не чекбокс, фокусуємо інпут після вставки
+            if (inputType !== "checkbox") {
+                input.focus();
+            }
+        }
 
         // Функція для відправки запиту на бекенд
-        function updateDocumentInDb(documentId, fieldName, newValue,dataType, callback) {
+        function updateDocumentInDb(documentId, fieldName, newValue, dataType, callback) {
             // Створюємо дані для відправки
             let data = {
                 id: documentId,
