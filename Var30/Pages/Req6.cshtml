@@ -6,11 +6,11 @@
 <form method="post">
     <div>
         <label for="SelectedDate">Select Date:</label>
-        <input type="date" asp-for="SelectedDate" required />
+        <input type="date" asp-for="SelectedDate" required value="DateTime.Now().Date" />
     </div>
     <button type="submit">Submit</button>
 </form>
-
+ 
 <h3>Clients Exceeded Allowed Rides</h3>
 @if (Model.ClientsExceededLiftCount.Any())
 {

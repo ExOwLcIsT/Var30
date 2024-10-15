@@ -56,18 +56,51 @@ public class DocumentController : ControllerBase
     [HttpPost("add-document")]
     public async Task<IActionResult> AddDocument([FromBody] AddDocumentRequest request)
     {
-        var role = this.HttpContext.Request.Cookies["Role"];
-        if (role != null && _userService.UserHasAccess(role, "operator"))
+        var user = this.HttpContext.Request.Cookies["Username"];
+        if (user != null && _userService.UserHasAccess(user, "operator"))
         {
             var collection = _mongoDB.GetCollection<BsonDocument>(request.CollectionName);
 
-            string jsonString = JsonSerializer.Serialize(request.Fields);
+            var bsonDocument = new BsonDocument();
 
-            var bsonDocument = BsonDocument.Parse(jsonString);
-            if (bsonDocument["_id"] != null)
+            foreach (var field in request.Fields)
             {
-                bsonDocument.Remove("_id");
+                var fieldName = field.Key;
+                var fieldValue = field.Value;
+                var dataType = request.DataTypes[fieldName]; // Отримуємо тип для кожного поля
+
+                // Перетворення типів на BSON
+                switch (dataType)
+                {
+                    case "BsonObjectId":
+                        bsonDocument[fieldName] = BsonValue.Create(fieldValue.ToString());
+                        break;
+                    case "BsonInt32":
+                        bsonDocument[fieldName] = BsonValue.Create(int.Parse(fieldValue.ToString()));
+                        break;
+                    case "BsonDouble":
+                        bsonDocument[fieldName] = BsonValue.Create(double.Parse(fieldValue.ToString()));
+                        break;
+                    case "BsonFloat":
+                        bsonDocument[fieldName] = BsonValue.Create(float.Parse(fieldValue.ToString()));
+                        break;
+                    case "BsonDecimal":
+                        bsonDocument[fieldName] = BsonValue.Create(decimal.Parse(fieldValue.ToString()));
+                        break;
+                    case "BsonBoolean":
+                        bsonDocument[fieldName] = BsonValue.Create(bool.Parse(fieldValue.ToString()));
+                        break;
+                    case "BsonDateTime":
+                        bsonDocument[fieldName] = BsonValue.Create(DateTime.Parse(fieldValue.ToString()));
+                        break;
+                    default:
+                        bsonDocument[fieldName] = BsonValue.Create(fieldValue.ToString());
+                        break;
+                }
             }
+            if (bsonDocument.Contains("_id"))
+                bsonDocument.Remove("_id");
+            // Вставка документа у колекцію
             await collection.InsertOneAsync(bsonDocument);
 
             return Ok(new { success = true, status = 201, documentId = bsonDocument["_id"].ToString() });
@@ -76,6 +109,7 @@ public class DocumentController : ControllerBase
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }
+
     }
     [HttpPost("delete-document")]
     public async Task<IActionResult> DeleteDocument([FromBody] DeleteDocumentRequest request)

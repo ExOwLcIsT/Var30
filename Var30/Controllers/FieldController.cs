@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Threading.Tasks;
 using Var30.Services;
+using MongoDB.Driver;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -87,15 +88,12 @@ public class FieldController : ControllerBase
         if (user != null && _userService.UserHasAccess(user, "admin"))
         {
             var collection = _mongoDB.GetCollection<BsonDocument>(request.CollectionName);
+            var filter = Builders<BsonDocument>.Filter.Ne(request.OldFieldName, BsonNull.Value); // Фільтр для документів, де поле "nmae" не є null
+            var update = Builders<BsonDocument>.Update.Rename(request.OldFieldName, request.NewFieldName); // Операція перейменування поля
 
-            // Для перейменування поля потрібно спочатку додати нове поле з тією ж самою інформацією, а потім видалити старе поле
-            var updateAdd = Builders<BsonDocument>.Update.Set(request.NewFieldName, $"${request.OldFieldName}");
-            var resultAdd = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.OldFieldName), updateAdd);
+            var result = await collection.UpdateManyAsync(filter, update);
 
-            var updateRemove = Builders<BsonDocument>.Update.Unset(request.OldFieldName);
-            var resultRemove = await collection.UpdateManyAsync(Builders<BsonDocument>.Filter.Exists(request.OldFieldName), updateRemove);
-
-            return Ok(new { success = true, modifiedCount = resultAdd.ModifiedCount });
+            return Ok(new { success = true, status = 200 });
         }
         else
         {

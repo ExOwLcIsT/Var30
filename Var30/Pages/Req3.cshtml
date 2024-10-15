@@ -9,11 +9,11 @@
 <form method="post">
     <div>
         <label for="StartDate">Start Date:</label>
-        <input type="date" asp-for="StartDate" required />
+        <input type="date" asp-for="StartDate" required value="DateTime.Now().Date" />
     </div>
     <div>
         <label for="EndDate">End Date:</label>
-        <input type="date" asp-for="EndDate" required />
+        <input type="date" asp-for="EndDate" required value="DateTime.Now().Date" />
     </div>
     <button type="submit">Submit</button>
 </form>

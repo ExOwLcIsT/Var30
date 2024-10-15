@@ -51,12 +51,7 @@ namespace Var30.Controllers
             var user = this.HttpContext.Request.Cookies["Username"];
             if (user != null && _userService.UserHasAccess(user, "owner"))
             {
-                var command = new BsonDocument
-            {
-                { "renameCollection", $"{request.OldName}" },
-                { "to", $"{request.NewName}" }
-            };
-                _mongoDB.RunCommand<BsonDocument>(command);
+                _mongoDB.RenameCollection(request.OldName, request.NewName);
                 return Ok(new { success = true, message = "Колекцію успішно перейменовано." });
             }
             return BadRequest(new { success = false, status = 403, message = "Недостатньо прав доступу." });

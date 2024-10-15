@@ -104,18 +104,11 @@
                                             if (bsonValue is MongoDB.Bson.BsonDateTime bsonDateTime)
                                             {
                                                 DateTime date = bsonDateTime.ToUniversalTime();
-                                                currentValue = date.ToString("yyyy-MM-dd"); // ISO формат для інпуту з типом "date"
                                             }
                                         }
                                         else if (dataType == "BsonBoolean")
                                         {
-                                            inputType = "checkbox"; // Для булевих значень
-
-                                            // Перевіряємо, чи можна кастити в BsonBoolean
-                                            if (bsonValue is MongoDB.Bson.BsonBoolean bsonBoolean)
-                                            {
-                                                currentValue = bsonBoolean.Value ? "checked" : ""; // Отримуємо значення bool через властивість Value
-                                            }
+                                            inputType = "checkbox"; // Для булевих значень                                            
                                         }
 
                                         // Виводимо інпут на основі типу
@@ -125,7 +118,7 @@
                                         }
                                         else
                                         {
-                                            <input type="@inputType" id="new-@key" class="form-control" value="@currentValue" placeholder="Введіть @key" />
+                                            <input type="@inputType" id="new-@key" class="form-control"  placeholder="Введіть @key" />
                                         }
                                     }
                                     else
@@ -163,42 +156,6 @@
 
 @section Scripts {
     <script>
-        function executeQuery() {
-            const query = document.getElementById("queries").value;
-            const resultBody = document.getElementById("resultBody");
-            resultBody.innerHTML = '';
-
-            if (!query) return;
-
-            const url = `api/SkiResort/${query}`;
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    if (data.length === 0) {
-                        resultBody.innerHTML = '<tr><td>Немає даних</td></tr>';
-                        return;
-                    }
-
-                    data.forEach(item => {
-                        let row = '<tr>';
-                        for (const property in item) {
-                            row += `<td>${item[property]}</td>`;
-                        }
-                        row += '</tr>';
-                        resultBody.innerHTML += row;
-                    });
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                    resultBody.innerHTML = '<tr><td>Сталася помилка при виконанні запиту</td></tr>';
-                }
-            });
-        }
-
-
         function addCollection() {
             const collectionName = document.getElementById("collectionName").value;
             fetch('/api/collection/add', {
@@ -210,22 +167,24 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data.message);
+                    alert(data.message);
                 })
                 .catch(error => console.error('Error:', error));
         }
 
         function deleteCollection(collectionName) {
-            fetch(`/api/collection/delete/${collectionName}`, {
-                method: 'DELETE'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data.message);
+            if (confirm('Ви впевнені, що хочете видалити цю колекцію?')) {
+                fetch(`/api/collection/delete/${collectionName}`, {
+                    method: 'DELETE'
                 })
-                .catch(error => console.error('Error:', error));
-        }
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
 
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
         function renameCollection() {
             const collectionName = document.getElementById("collectionName").value;
             const newCollectionName = prompt("Введіть нову назву колекції:", collectionName);
@@ -239,7 +198,7 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data.message);
+                        alert(data.message);
                     })
                     .catch(error => console.error('Error:', error));
             }
@@ -281,27 +240,29 @@
 
         // Функція для видалення поля
         function removeField(fieldName) {
-            let data = {
-                CollectionName: "@Model.CollectionData.SelectedCollection",
-                FieldName: fieldName
-            };
+            if (confirm('Ви впевнені, що хочете видалити це поле?')) {
+                let data = {
+                    CollectionName: "@Model.CollectionData.SelectedCollection",
+                    FieldName: fieldName
+                };
 
-            fetch('/api/field/remove-field', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Перезавантажити сторінку після видалення
-                    } else {
-                        console.error('Не вдалося видалити поле');
-                    }
+                fetch('/api/field/remove-field', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 })
-                .catch(error => console.error('Error:', error));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload(); // Перезавантажити сторінку після видалення
+                        } else {
+                            console.error('Не вдалося видалити поле');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         }
 
         // Функція для редагування заголовку (хедера)
@@ -357,7 +318,6 @@
 
         // Видалення документа
         function deleteDocument(documentId) {
-            console.log(documentId)
             if (confirm('Ви впевнені, що хочете видалити цей документ?')) {
                 fetch(`/api/document/delete-document`, {
                     method: 'POST',
@@ -382,23 +342,38 @@
             }
         }
 
-        // Додавання нового документа
         function addNewDocument() {
             const newDocument = {};
+            const dataTypes = {};
             const headers = @Html.Raw(Json.Serialize(Model.CollectionData.Headers));
 
             headers.forEach(function (key) {
                 var inputElement = document.getElementById(`new-${key}`);
 
-    if (inputElement.type === "checkbox") {
-        // Якщо інпут є чекбоксом, перевіряємо, чи він позначений
-        newDocument[key] = inputElement.checked ? true : false;
-    } else {
-        // Для всіх інших типів інпутів
-        newDocument[key] = inputElement.value;
-    }
+                if (inputElement.type === "checkbox") {
+                    // Якщо інпут є чекбоксом, зберігаємо значення як булеве
+                    newDocument[key] = inputElement.checked;
+                    dataTypes[key] = "BsonBoolean"; // Вказуємо тип
+                } else if (inputElement.type === "date") {
+                    // Якщо інпут є датою, зберігаємо як рядок
+                    newDocument[key] = inputElement.value;
+                    dataTypes[key] = "BsonDateTime"; // Вказуємо тип
+                } else if (inputElement.type === "number") {
+                    // Якщо це числове значення, визначаємо тип залежно від значення
+                    newDocument[key] = inputElement.value;
+                    if (inputElement.step && inputElement.step.includes(".")) {
+                        dataTypes[key] = "BsonDouble"; // Вказуємо тип для числа з плаваючою точкою
+                    } else {
+                        dataTypes[key] = "BsonInt32"; // Вказуємо тип для цілого числа
+                    }
+                } else {
+                    // Для всіх інших типів інпутів (рядкові)
+                    newDocument[key] = inputElement.value;
+                    dataTypes[key] = "BsonString"; // Вказуємо тип як рядок
+                }
             });
-            console.log(newDocument);
+
+            // Відправка даних на сервер
             fetch(`/api/document/add-document`, {
                 method: 'POST',
                 headers: {
@@ -406,7 +381,8 @@
                 },
                 body: JSON.stringify({
                     collectionName: "@Model.CollectionData.SelectedCollection",
-                    fields: newDocument
+                    fields: newDocument,
+                    dataTypes: dataTypes
                 })
             })
                 .then(response => response.json())
@@ -428,13 +404,11 @@
 
             // Визначаємо тип інпуту на основі типу даних
             let inputType = "text"; // За замовчуванням текстовий інпут
-            console.log(dataType);
             if (dataType === "BsonInt32" || dataType === "BsonDouble" || dataType === "BsonFloat" || dataType === "BsonDecimal") {
                 inputType = "number"; // Для числових значень
             } else if (dataType === "BsonDateTime") {
                 inputType = "date"; // Для дат
                 let date = new Date(currentValue);
-                console.log(date);
                 currentValue = date.toISOString().split('T')[0];
             } else if (dataType === "BsonBoolean") {
                 inputType = "checkbox"; // Для булевих значень
@@ -475,9 +449,6 @@
                     let newValue = this.checked == null ? false : this.checked;
                     let documentId = td.closest('tr').getAttribute('data-document-id');
                     let fieldName = td.getAttribute('data-field-name');
-                    console.log(newValue)
-                    console.log(documentId)
-                    console.log(fieldName)
                     updateDocumentInDb(documentId, fieldName, `${newValue}`, dataType, function (success) {
                         if (success) {
                             td.innerText = newValue ? "true" : "false";
@@ -524,12 +495,11 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data.status)
                     if (data.status === 200) {
-                        console.log('Документ успішно оновлено.');
+                        alert('Документ успішно оновлено.');
                         callback(true); // Викликаємо callback з успішним результатом
                     } else {
-                        console.error('Помилка при оновленні документа:', data.error);
+                                alert('Помилка при оновленні документа:', data.error);
                         callback(false); // Викликаємо callback з помилкою
                     }
                 })
