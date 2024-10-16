@@ -36,7 +36,7 @@ namespace Var30.Pages
             var liftNames = new Dictionary<ObjectId, string>();
             foreach (var lift in lifts)
             {
-                liftNames[lift["_id"].AsObjectId] = lift["name"].AsString; // Assuming the lift name is stored in the "name" field
+                liftNames[lift["_id"].AsObjectId] = lift["name"].AsString;
             }
 
             // Daily usage

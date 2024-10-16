@@ -47,7 +47,7 @@ namespace Var30.Pages
                         WorkerName = worker["name"].AsString,
                         Position = worker["position"].AsString,
                         EquipmentId = record["equipment_id"].AsObjectId,
-                        Date = record["date"].ToLocalTime() // Коректна обробка дати
+                        Date = record["date"].ToUniversalTime(),
                     });
                 }
             }
@@ -59,7 +59,10 @@ namespace Var30.Pages
 
                 // Фільтруємо отримані записи за датою
                 var filteredRecords = usageRecords
-                    .Where(record => record["date"].ToUniversalTime().Date == selectedDateOnly)
+                    .Where(record =>
+                    {
+                        return record["date"].ToUniversalTime().Date.AddDays(1) == selectedDateOnly;
+                    })
                     .ToList();
 
                 foreach (var record in filteredRecords)

@@ -359,13 +359,8 @@
                     newDocument[key] = inputElement.value;
                     
                 }
-                else if (inputElement.type === "number") {                    // Якщо це числове значення, визначаємо тип залежно від значення
-                    newDocument[key] = inputElement.value;
-                    if (inputElement.step && inputElement.step.includes(".")) {
-                       
-                    } else {
-                       
-                    }
+                else if (inputElement.type === "number") {  // Якщо це числове значення, визначаємо тип залежно від значення
+                    newDocument[key] = inputElement.value;                    
                 } else {
                     // Для всіх інших типів інпутів (рядкові)
                     newDocument[key] = inputElement.value;
@@ -428,7 +423,7 @@
 
             input.onblur = function () {
                 if (this.type !== "checkbox") {
-                    if (this.value !== currentValue) {
+                    if (this.value !== currentValue && "" !== this.value) {
                         let newValue = this.value;
                         let documentId = td.closest('tr').getAttribute('data-document-id'); // Отримаємо id документа
                         let fieldName = td.getAttribute('data-field-name'); // Отримаємо ім'я поля
@@ -439,12 +434,12 @@
                                 // Якщо запит успішний, змінюємо значення комірки
                                 td.innerText = newValue;
                             } else {
-                                td.innerText = currentValue;
+                                td.innerHTML = currentValue;
                                 alert('Не вдалося оновити документ');
                             }
                         });
                     } else {
-                        td.innerText = currentValue;
+                        td.innerHTML = currentValue;
                     }
                 } else {
                     let newValue = this.checked == null ? false : this.checked;

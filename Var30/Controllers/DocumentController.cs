@@ -93,7 +93,7 @@ public class DocumentController : ControllerBase
                             bsonDocument[fieldName] = BsonValue.Create(bool.Parse(fieldValue.ToString()));
                             break;
                         case "BsonDateTime":
-                            bsonDocument[fieldName] = BsonValue.Create(DateTime.Parse(fieldValue.ToString()));
+                            bsonDocument[fieldName] = BsonValue.Create(DateTime.Parse(fieldValue.ToString()).ToUniversalTime());
                             break;
                         default:
                             bsonDocument[fieldName] = BsonValue.Create(fieldValue.ToString());
