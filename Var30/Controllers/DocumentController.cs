@@ -70,32 +70,35 @@ public class DocumentController : ControllerBase
                 var dataType = request.DataTypes[fieldName]; // Отримуємо тип для кожного поля
 
                 // Перетворення типів на BSON
-                switch (dataType)
+                if (fieldName != "_id")
                 {
-                    case "BsonObjectId":
-                        bsonDocument[fieldName] = BsonValue.Create(fieldValue.ToString());
-                        break;
-                    case "BsonInt32":
-                        bsonDocument[fieldName] = BsonValue.Create(int.Parse(fieldValue.ToString()));
-                        break;
-                    case "BsonDouble":
-                        bsonDocument[fieldName] = BsonValue.Create(double.Parse(fieldValue.ToString()));
-                        break;
-                    case "BsonFloat":
-                        bsonDocument[fieldName] = BsonValue.Create(float.Parse(fieldValue.ToString()));
-                        break;
-                    case "BsonDecimal":
-                        bsonDocument[fieldName] = BsonValue.Create(decimal.Parse(fieldValue.ToString()));
-                        break;
-                    case "BsonBoolean":
-                        bsonDocument[fieldName] = BsonValue.Create(bool.Parse(fieldValue.ToString()));
-                        break;
-                    case "BsonDateTime":
-                        bsonDocument[fieldName] = BsonValue.Create(DateTime.Parse(fieldValue.ToString()));
-                        break;
-                    default:
-                        bsonDocument[fieldName] = BsonValue.Create(fieldValue.ToString());
-                        break;
+                    switch (dataType)
+                    {
+                        case "BsonObjectId":
+                            bsonDocument[fieldName] = BsonValue.Create(ObjectId.Parse(fieldValue.ToString()));
+                            break;
+                        case "BsonInt32":
+                            bsonDocument[fieldName] = BsonValue.Create(int.Parse(fieldValue.ToString()));
+                            break;
+                        case "BsonDouble":
+                            bsonDocument[fieldName] = BsonValue.Create(double.Parse(fieldValue.ToString()));
+                            break;
+                        case "BsonFloat":
+                            bsonDocument[fieldName] = BsonValue.Create(float.Parse(fieldValue.ToString()));
+                            break;
+                        case "BsonDecimal":
+                            bsonDocument[fieldName] = BsonValue.Create(decimal.Parse(fieldValue.ToString()));
+                            break;
+                        case "BsonBoolean":
+                            bsonDocument[fieldName] = BsonValue.Create(bool.Parse(fieldValue.ToString()));
+                            break;
+                        case "BsonDateTime":
+                            bsonDocument[fieldName] = BsonValue.Create(DateTime.Parse(fieldValue.ToString()));
+                            break;
+                        default:
+                            bsonDocument[fieldName] = BsonValue.Create(fieldValue.ToString());
+                            break;
+                    }
                 }
             }
             if (bsonDocument.Contains("_id"))

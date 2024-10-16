@@ -108,22 +108,22 @@
                                         }
                                         else if (dataType == "BsonBoolean")
                                         {
-                                            inputType = "checkbox"; // Для булевих значень                                            
+                                            inputType = "checkbox"; // Для булевих значень
                                         }
 
                                         // Виводимо інпут на основі типу
                                         if (inputType == "checkbox")
                                         {
-                                            <input type="checkbox" id="new-@key"  @currentValue />
+                                            <input type="checkbox" id="new-@key" @currentValue />
                                         }
                                         else
                                         {
-                                            <input type="@inputType" id="new-@key" class="form-control"  placeholder="Введіть @key" />
+                                            <input data-type="@dataType" type="@inputType" id="new-@key" class="form-control" placeholder="Введіть @key" />
                                         }
                                     }
                                     else
                                     {
-                                        <input type="text" id="new-@key" class="form-control" placeholder="Введіть @key" />
+                                        <input data-type="BsonString" type="text" id="new-@key" class="form-control" placeholder="Введіть @key" />
                                     }
 
                                 </td>
@@ -349,28 +349,29 @@
 
             headers.forEach(function (key) {
                 var inputElement = document.getElementById(`new-${key}`);
-
-                if (inputElement.type === "checkbox") {
+                console.log(inputElement.getAttribute("data-type"));
+                if (inputElement.getAttribute("data-type") === "checkbox") {
                     // Якщо інпут є чекбоксом, зберігаємо значення як булеве
                     newDocument[key] = inputElement.checked;
-                    dataTypes[key] = "BsonBoolean"; // Вказуємо тип
+                   
                 } else if (inputElement.type === "date") {
                     // Якщо інпут є датою, зберігаємо як рядок
                     newDocument[key] = inputElement.value;
-                    dataTypes[key] = "BsonDateTime"; // Вказуємо тип
-                } else if (inputElement.type === "number") {
-                    // Якщо це числове значення, визначаємо тип залежно від значення
+                    
+                }
+                else if (inputElement.type === "number") {                    // Якщо це числове значення, визначаємо тип залежно від значення
                     newDocument[key] = inputElement.value;
                     if (inputElement.step && inputElement.step.includes(".")) {
-                        dataTypes[key] = "BsonDouble"; // Вказуємо тип для числа з плаваючою точкою
+                       
                     } else {
-                        dataTypes[key] = "BsonInt32"; // Вказуємо тип для цілого числа
+                       
                     }
                 } else {
                     // Для всіх інших типів інпутів (рядкові)
                     newDocument[key] = inputElement.value;
-                    dataTypes[key] = "BsonString"; // Вказуємо тип як рядок
+                  
                 }
+                dataTypes[key] = inputElement.getAttribute("data-type"); // Вказуємо тип як рядок
             });
 
             // Відправка даних на сервер
@@ -499,7 +500,7 @@
                         alert('Документ успішно оновлено.');
                         callback(true); // Викликаємо callback з успішним результатом
                     } else {
-                                alert('Помилка при оновленні документа:', data.error);
+                        alert('Помилка при оновленні документа:', data.error);
                         callback(false); // Викликаємо callback з помилкою
                     }
                 })
